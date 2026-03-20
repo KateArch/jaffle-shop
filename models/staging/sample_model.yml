@@ -6,7 +6,6 @@ models:
         description: Unique identifier for the article.
         data_tests:
           - not_null
-          - unique
       - name: Journal_Type
         description: Publishing access type for the journal (e.g. Open Access, Subscription, Hybrid).
       - name: Region
@@ -27,3 +26,13 @@ models:
         description: Number of reviewers assigned to the article.
       - name: Article_Type
         description: Type/category of the article (e.g. Case Study, Research, Review, Editorial).
+      - name: Submission_to_review
+        description: Days between `Submission_Date` and `Review_Start_Date`.
+      - name: Review_duration
+        description: Days between `Review_Start_Date` and `Review_End_Date`.
+      - name: Review_to_production
+        description: Days between `Review_End_Date` and `Production_Start_Date`.
+      - name: Production_duration
+        description: Days between `Production_Start_Date` and `Production_End_Date`.
+      - name: Submission_to_publication
+        description: Days between `Submission_Date` and `Publication_Date`.
