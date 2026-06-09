@@ -1,0 +1,2 @@
+SELECT AVG(Production_to_publication)
+FROM sample_model
