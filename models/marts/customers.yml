@@ -7,9 +7,6 @@ models:
         build_after:
           count: 4
           period: hour
-    #data_tests:
-     # - dbt_utils.expression_is_true:
-      #    expression: "lifetime_spend_pretax + lifetime_tax_paid = lifetime_spend"
     columns:
       - name: customer_id
         description: The unique key of the orders mart.
@@ -47,7 +44,6 @@ models:
           - accepted_values:
               arguments:
                 values: ["new", "returning"]
-
         dimension:
           type: categorical
     semantic_model:
@@ -66,19 +62,13 @@ models:
         agg: sum
       - name: customers
         description: Count of unique customers
+        type: simple
         agg: count_distinct
         expr: customer_id
-      - name: count_lifetime_orders
-        description: Total count of orders per customer.
-        agg: sum
-      - name: lifetime_spend_pretax
-        description: Customer lifetime spend before taxes.
-        agg: sum
       - name: lifetime_spend
-        agg: sum
         description: Gross customer lifetime spend inclusive of taxes.
-
         type: simple
+        agg: sum
         hidden: true
       - name: average_order_value
         description: LTV pre-tax / number of orders

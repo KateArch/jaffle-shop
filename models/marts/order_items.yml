@@ -2,15 +2,14 @@ models:
   - name: order_items
     columns:
       - name: order_item_id
-        data_tests:  
-          - not_null 
+        data_tests:
+          - not_null
           - unique
         entity:
           type: primary
           name: order_item
       - name: order_id
         data_tests:
-           
           - relationships:
               arguments:
                 to: ref('orders')
@@ -66,7 +65,6 @@ models:
         expr: product_price
         filter: |
           {{ Dimension('order_item__is_drink_item') }} = true
-
       - name: food_revenue_pct
         description: The % of order revenue from food.
         label: Food Revenue %
@@ -130,53 +128,7 @@ unit_tests:
         - { order_id: 2, product_id: 2, supply_cost: 8.50 }
         - { order_id: 2, product_id: 2, supply_cost: 8.50 }
 
-semantic_models:
-  - name: order_item
-    defaults:
-      agg_time_dimension: ordered_at
-    description: |
-      Items contatined in each order. The grain of the table is one row per order item.
-    model: ref('order_items')
-    entities:
-      - name: order_item
-        type: primary
-        expr: order_item_id
-      - name: order_id
-        type: foreign
-        expr: order_id
-      - name: product
-        type: foreign
-        expr: product_id
-    dimensions:
-      - name: ordered_at
-        expr: ordered_at
-        type: time
-        type_params:
-          time_granularity: day
-      - name: is_food_item
-        type: categorical
-      - name: is_drink_item
-        type: categorical
-    measures:
-      - name: revenue
-        description: The revenue generated for each order item. Revenue is calculated as a sum of revenue associated with each product in an order.
-        agg: sum
-        expr: product_price
-      - name: food_revenue
-        description: The revenue generated for each order item. Revenue is calculated as a sum of revenue associated with each product in an order.
-        agg: sum
-        expr: case when is_food_item then product_price else 0 end
-      - name: drink_revenue
-        description: The revenue generated for each order item. Revenue is calculated as a sum of revenue associated with each product in an order.
-        agg: sum
-        expr: case when is_drink_item then product_price else 0 end
-      - name: median_revenue
-        description: The median revenue generated for each order item.
-        agg: median
-        expr: product_price
-
 metrics:
-  # Simple metrics
   - name: order_gross_profit
     description: Gross profit from each order.
     type: derived
@@ -205,7 +157,6 @@ saved_queries:
           export_as: table
 
 exposures:
-
   - name: weekly_jaffle_orders
     type: dashboard
     maturity: high
@@ -216,4 +167,3 @@ exposures:
     owner:
       name: Callum McData
       email: data@jaffleshop.com
-
