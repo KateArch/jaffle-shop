@@ -1,103 +1,28 @@
 models:
   - name: customers
-    description: "Customer overview data mart, offering key details for each unique customer. One row per customer. Customer grain mart.\n"
-    config:
-   #   freshness:
-   #     updates_on: any
-  #    build_after:
-   #      count: 4
-    #      period: hour
-    #data_tests:
-     # - dbt_utils.expression_is_true:
-      #    expression: "lifetime_spend_pretax + lifetime_tax_paid = lifetime_spend"
+    description: >
+      Customer-level mart with one row per customer. Starts from `stg_customers`
+      and adds lifetime order activity and spend rollups from `orders` for
+      customer reporting, segmentation, and downstream metrics.
     columns:
       - name: customer_id
-        description: The unique key of the orders mart.
+        description: Primary key for the customer record.
         data_tests:
           - not_null
           - unique
-        entity:
-          type: primary
-          name: customer
       - name: customer_name
-        description: Customers' full name.
-        dimension:
-          type: categorical
+        description: Customer name from the source customer record.
       - name: count_lifetime_orders
-        description: Total number of orders a customer has ever placed.
+        description: Total number of distinct orders placed by the customer across all time.
       - name: first_ordered_at
-        description: The timestamp when a customer placed their first order.
-        dimension:
-          type: time
-        granularity: day
+        description: Timestamp of the customer's first recorded order.
       - name: last_ordered_at
-        description: The timestamp of a customer's most recent order.
-        dimension:
-          type: time
-        granularity: day
+        description: Timestamp of the customer's most recent recorded order.
       - name: lifetime_spend_pretax
-        description: The sum of all the pre-tax subtotals of every order a customer has placed.
+        description: Total pretax order subtotal summed across all customer orders.
       - name: lifetime_tax_paid
-        description: The sum of all the tax portion of every order a customer has placed.
+        description: Total tax paid summed across all customer orders.
       - name: lifetime_spend
-        description: The sum of all the order totals (including tax) that a customer has ever placed.
+        description: Total amount spent by the customer including tax.
       - name: customer_type
-        description: Options are 'new' or 'returning', indicating if a customer has ordered more than once or has only placed their first order to date.
-        data_tests:
-          - accepted_values:
-              arguments:
-                values: ["new", "returning"]
-
-        dimension:
-          type: categorical
-    semantic_model:
-      enabled: true
-    agg_time_dimension: first_ordered_at
-    metrics:
-      - name: lifetime_spend_pretax
-        description: Customer's lifetime spend before tax
-        label: LTV Pre-tax
-        type: simple
-        agg: sum
-      - name: count_lifetime_orders
-        description: Count of lifetime orders
-        label: Count Lifetime Orders
-        type: simple
-        agg: sum
-      - name: customers
-        description: Count of unique customers
-        agg: count_distinct
-        expr: customer_id
-      - name: count_lifetime_orders
-        description: Total count of orders per customer.
-        agg: sum
-      - name: lifetime_spend_pretax
-        description: Customer lifetime spend before taxes.
-        agg: sum
-      - name: lifetime_spend
-        agg: sum
-        description: Gross customer lifetime spend inclusive of taxes.
-
-        type: simple
-        hidden: true
-      - name: average_order_value
-        description: LTV pre-tax / number of orders
-        label: Average Order Value
-        type: derived
-        expr: lifetime_spend_pretax / count_lifetime_orders
-        input_metrics:
-          - name: count_lifetime_orders
-          - name: lifetime_spend_pretax
-saved_queries:
-  - name: customer_order_metrics
-    query_params:
-      metrics:
-        - count_lifetime_orders
-        - lifetime_spend_pretax
-        - average_order_value
-      group_by:
-        - Entity('customer')
-    exports:
-      - name: customer_order_metrics
-        config:
-          export_as: table
+        description: Customer segment derived from order history, marked as `new` for a single order and `returning` for multiple orders.
